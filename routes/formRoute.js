@@ -6,7 +6,7 @@ const {
   adminOnly,
   AdminandAuditorOnly,
   verifiedOnly,
-} = require('../middleWare/authMiddleware');
+} = require('../middleWare/authMiddleware.js');
 
 const {
   createForm,
