@@ -23,7 +23,7 @@
     "mongoose": "^6.8.4",
     "mongoose-paginate-v2": "^1.7.1",
     "nodemailer": "^6.9.0",
-    "nodemailer-express-handlebars": "^6.0.0",
+    "nodemailer-express-handlebars": "^6.1.0",
     "ua-parser-js": "^1.0.32"
   }
 }
