@@ -1,0 +1,43 @@
+const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
+const FormSchema = new mongoose.Schema(
+  {
+    createdBy: {
+      _id: false,
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      name: String,
+      email: String,
+      role: String,
+    },
+
+    title: {
+      type: String,
+      required: [true, 'Please add a Form Title'],
+    },
+    description: {
+      type: String,
+      default: '',
+    },
+    questions: [
+      {
+        // open: { type: Boolean, default: false },
+        questionText: String,
+        options: [
+          {
+            optionText: String,
+          },
+        ],
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
+FormSchema.plugin(mongoosePaginate);
+const FormData = mongoose.model('Form', FormSchema, 'Form');
+
+module.exports = FormData;
