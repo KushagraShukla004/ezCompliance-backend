@@ -4,7 +4,7 @@ const {
   protect,
   auditorOnly,
   adminOnly,
-} = require('../middleWare/authMiddleware');
+} = require('../middleware/authMiddleware');
 const {
   registerUser,
   loginUser,
