@@ -17,7 +17,11 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://ezcompliance.vercel.app'],
+    origin: [
+      'http://localhost:3000',
+      'https://ezcompliance.vercel.app',
+      'https://ezcomplaince-api.onrender.com',
+    ],
     credentials: true,
   })
 );
