@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
-transporter.use('compile', hbs(options));
+
 const sendEmail = async (
   subject,
   // message,
