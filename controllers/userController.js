@@ -172,7 +172,7 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   // get the login code
   const loginCode = userToken.loginToken;
   const decryptedLoginCode = cryptr.decrypt(loginCode);
-  console.log('login code : ', loginCode);
+  // console.log('login code : ', loginCode);
   console.log('decrypted Login Code : ', decryptedLoginCode);
   // const subject = 'Login Access Code - ezCompliance';
   // const send_to = email;
