@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const Token = require('../models/tokenModel');
-const sendEmail = require('../utils/sendEmail');
+// const sendEmail = require('../utils/sendEmail');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { hashToken, generateToken } = require('../utils');
@@ -173,31 +173,32 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   const loginCode = userToken.loginToken;
   const decryptedLoginCode = cryptr.decrypt(loginCode);
   console.log('login code : ', loginCode);
-  const subject = 'Login Access Code - ezCompliance';
-  const send_to = email;
-  const sent_from = process.env.EMAIL_USER;
-  const reply_to = 'noreply@ezcompliance.com';
-  const template = 'accessToken';
-  const name = user.name;
-  const link = decryptedLoginCode;
-  try {
-    await sendEmail(
-      subject,
-      send_to,
-      sent_from,
-      reply_to,
-      template,
-      name,
-      link
-    );
-    res.status(200).json({
-      success: true,
-      message: `Access Code Sent to your email - ${email}`,
-    });
-  } catch (error) {
-    res.status(500);
-    throw new Error('Email not sent, please try again');
-  }
+  console.log('decrypted Login Code : ', decryptedLoginCode);
+  // const subject = 'Login Access Code - ezCompliance';
+  // const send_to = email;
+  // const sent_from = process.env.EMAIL_USER;
+  // const reply_to = 'noreply@ezcompliance.com';
+  // const template = 'accessToken';
+  // const name = user.name;
+  // const link = decryptedLoginCode;
+  // try {
+  //   await sendEmail(
+  //     subject,
+  //     send_to,
+  //     sent_from,
+  //     reply_to,
+  //     template,
+  //     name,
+  //     link
+  //   );
+  //   res.status(200).json({
+  //     success: true,
+  //     message: `Access Code Sent to your email - ${email}`,
+  //   });
+  // } catch (error) {
+  //   res.status(500);
+  //   throw new Error('Email not sent, please try again');
+  // }
 });
 
 // Send Verification Email
@@ -238,6 +239,7 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
   // Construct Verification Url
   const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
 
+  console.log('verificationURL: ', verificationUrl);
   // Verification Email
   // const message = `
   //     <h2>Hello ${user.name}</h2>
@@ -249,29 +251,29 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
   //     <p>Regards...</p>
   //     <p>AUTH:Z Team</p>
   //   `;
-  const subject = 'Verify Your Account - ezCompliance';
-  const send_to = user.email;
-  const sent_from = process.env.EMAIL_USER;
-  const reply_to = 'noreply@ezcompliance.com';
-  const template = 'verifyEmail';
-  const name = user.name;
-  const link = verificationUrl;
+  // const subject = 'Verify Your Account - ezCompliance';
+  // const send_to = user.email;
+  // const sent_from = process.env.EMAIL_USER;
+  // const reply_to = 'noreply@ezcompliance.com';
+  // const template = 'verifyEmail';
+  // const name = user.name;
+  // const link = verificationUrl;
 
-  try {
-    await sendEmail(
-      subject,
-      send_to,
-      sent_from,
-      reply_to,
-      template,
-      name,
-      link
-    );
-    res.status(200).json({ success: true, message: 'Verification Email Sent' });
-  } catch (error) {
-    res.status(500);
-    throw new Error('Email not sent, please try again');
-  }
+  // try {
+  //   await sendEmail(
+  //     subject,
+  //     send_to,
+  //     sent_from,
+  //     reply_to,
+  //     template,
+  //     name,
+  //     link
+  //   );
+  //   res.status(200).json({ success: true, message: 'Verification Email Sent' });
+  // } catch (error) {
+  //   res.status(500);
+  //   throw new Error('Email not sent, please try again');
+  // }
 });
 
 //Logout
@@ -416,26 +418,26 @@ const sendAutomatedEmail = asyncHandler(async (req, res) => {
   // const sent_from = process.env.EMAIL_USER;
   // const reply_to = "noreply@ezcompliance.com";
   // const template = "email";
-  const sent_from = process.env.EMAIL_USER;
-  const name = user.name;
-  const link = `${process.env.FRONTEND_URL}${url}`;
   // const role = user.role;
+  // const sent_from = process.env.EMAIL_USER;
+  // const name = user.name;
+  // const link = `${process.env.FRONTEND_URL}${url}`;
 
-  try {
-    await sendEmail(
-      subject,
-      send_to,
-      sent_from,
-      reply_to,
-      template,
-      name,
-      link
-    );
-    res.status(200).json({ success: true, message: 'Email Sent!!!' });
-  } catch (error) {
-    res.status(500);
-    throw new Error('Email not sent, please try again');
-  }
+  // try {
+  //   await sendEmail(
+  //     subject,
+  //     send_to,
+  //     sent_from,
+  //     reply_to,
+  //     template,
+  //     name,
+  //     link
+  //   );
+  //   res.status(200).json({ success: true, message: 'Email Sent!!!' });
+  // } catch (error) {
+  //   res.status(500);
+  //   throw new Error('Email not sent, please try again');
+  // }
 });
 
 // Verify User
@@ -544,29 +546,30 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const resetUrl = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
 
   // Reset Email
-  const subject = 'Password Reset Request';
-  const send_to = user.email;
-  const sent_from = process.env.EMAIL_USER;
-  const reply_to = 'noreply@ezcompliance.com';
-  const template = 'forgotPassword';
-  const name = user.name;
+  // const subject = 'Password Reset Request';
+  // const send_to = user.email;
+  // const sent_from = process.env.EMAIL_USER;
+  // const reply_to = 'noreply@ezcompliance.com';
+  // const template = 'forgotPassword';
+  // const name = user.name;
   const link = resetUrl;
+  alert('link: ', link);
 
-  try {
-    await sendEmail(
-      subject,
-      send_to,
-      sent_from,
-      reply_to,
-      template,
-      name,
-      link
-    );
-    res.status(200).json({ success: true, message: 'Email Sent!!!' });
-  } catch (error) {
-    res.status(500);
-    throw new Error('Email not sent, please try again');
-  }
+  // try {
+  //   await sendEmail(
+  //     subject,
+  //     send_to,
+  //     sent_from,
+  //     reply_to,
+  //     template,
+  //     name,
+  //     link
+  //   );
+  //   res.status(200).json({ success: true, message: 'Email Sent!!!' });
+  // } catch (error) {
+  //   res.status(500);
+  //   throw new Error('Email not sent, please try again');
+  // }
 });
 
 // Reset Password
