@@ -21,12 +21,12 @@ const {
 } = require('../controllers/formController');
 
 //Form Routes
-router.post('/createForm', protect, auditorOnly, createForm);
+router.post('/createForm', protect, adminOnly, createForm);
 router.get('/allForms', protect, AdminandAuditorOnly, getAllForms);
-router.get('/', protect, auditorOnly, getAllFormsofUser);
+router.get('/', protect, AdminandAuditorOnly, getAllFormsofUser);
 router.get('/form/:formId', protect, getFormById);
-router.delete('/deleteForm/:formId', protect, auditorOnly, deleteForm);
-router.patch('/editForm/:formId', protect, auditorOnly, editForm);
+router.delete('/deleteForm/:formId', protect, adminOnly, deleteForm);
+router.patch('/editForm/:formId', protect, adminOnly, editForm);
 
 //Response Routes
 router.post('/addResponse', protect, submitResponse);

@@ -3,9 +3,17 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = mongoose.Schema(
   {
+    emp_Id: {
+      type: String,
+      required: [true, 'Please add your Employee Code/Id'],
+    },
     name: {
       type: String,
       required: [true, 'Please add a name'],
+    },
+    designation: {
+      type: String,
+      required: [true, 'Please add your designation'],
     },
     email: {
       type: String,

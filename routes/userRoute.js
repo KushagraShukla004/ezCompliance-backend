@@ -20,20 +20,15 @@ const {
   getUsers,
   deleteUser,
   upgradeUser,
-  sendAutomatedEmail,
-  //   loginWithGoogle,
   sendLoginCode,
-  //   deleteAll,
   loginWithCode,
 } = require('../controllers/userController');
 
 router.post('/register', registerUser);
 router.post('/sendVerificationEmail', protect, sendVerificationEmail);
-router.patch('/verifyUser/:verificationToken', verifyUser);
+router.patch('', verifyUser);
 router.post('/login', loginUser);
 router.get('/logout', logoutUser);
-
-router.post('/sendAutomatedEmail', protect, sendAutomatedEmail);
 router.post('/sendLoginCode/:email', sendLoginCode);
 router.post('/loginWithCode/:email', loginWithCode);
 
@@ -46,9 +41,6 @@ router.patch('/resetPassword/:resetToken', resetPassword);
 
 router.delete('/:id', protect, adminOnly, deleteUser);
 router.get('/getUsers', protect, adminOnly, getUsers);
-// router.post('/delete', deleteAll);
 router.post('/upgrade', protect, adminOnly, upgradeUser);
-
-// router.post('/google/callback', loginWithGoogle);
 
 module.exports = router;

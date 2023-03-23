@@ -13,18 +13,12 @@ const FormSchema = new mongoose.Schema(
       email: String,
       role: String,
     },
-
-    title: {
+    category: {
       type: String,
-      required: [true, 'Please add a Form Title'],
-    },
-    description: {
-      type: String,
-      default: '',
+      required: [true, 'Please add a Category'],
     },
     questions: [
       {
-        // open: { type: Boolean, default: false },
         questionText: String,
         options: [
           {

@@ -2,15 +2,16 @@ const asyncHandler = require('express-async-handler');
 const FormData = require('../models/formModel');
 const UserData = require('../models/userModel');
 const ResponseData = require('../models/responseModel');
+// const ResourceData = require('../models/resourceModel');
 const mongoose = require('mongoose');
 
 // Create Form
 const createForm = asyncHandler(async (req, res) => {
-  const { title, description, createdBy, questions } = req.body;
+  const { createdBy, category, questions } = req.body;
 
   //   Validation
   // || !questionText || !optionText
-  if (!title || !description) {
+  if (!category || !questions) {
     res.status(400);
     throw new Error('Please fill in all fields');
   }
@@ -18,8 +19,7 @@ const createForm = asyncHandler(async (req, res) => {
   // Create Form
   const Form = await FormData.create({
     createdBy,
-    title,
-    description,
+    category,
     questions,
   });
   console.log('Form: ', Form);
@@ -30,7 +30,7 @@ const createForm = asyncHandler(async (req, res) => {
       $push: {
         createdForms: {
           formId: Form._id,
-          title: Form.title,
+          categories: Form.category,
         },
       },
     }
@@ -59,40 +59,11 @@ const getAllForms = asyncHandler(async (req, res) => {
 const getFormById = asyncHandler(async (req, res) => {
   const { formId } = req.params;
   const Form = await FormData.findById(formId);
-  // const Form = await FormData.aggregate([
-  //   { $match: { _id: new mongoose.Types.ObjectId(formId) } },
-  //   {
-  //     $lookup: {
-  //       from: 'users',
-  //       foreignField: '_id',
-  //       localField: 'createdBy',
-  //       as: 'createdByData',
-  //       pipeline: [{ $project: { name: 1, email: 1, role: 1 } }],
-  //     },
-  //   },
-  //   {
-  //     $project: {
-  //       _id: 1,
-  //       createdBy: { $first: '$createdByData' },
-  //       title: 1,
-  //       description: 1,
-  //       questions: 1,
-  //     },
-  //   },
-  // ]);
-  // console.log('Form (in getFormById Controller): ', Form);
-
   // if product doesnt exist
   if (!Form) {
     res.status(404);
     throw new Error('Form not found');
   }
-
-  // // Match Form to its user
-  // if (Form.createdBy.toString() !== req.user.id.toString()) {
-  //   res.status(401);
-  //   throw new Error('User not authorized');
-  // }
   res.status(200).json(Form);
 });
 
@@ -119,7 +90,7 @@ const deleteForm = asyncHandler(async (req, res) => {
       $pull: {
         createdForms: {
           formId: form._id,
-          title: form.title,
+          category: form.category,
         },
       },
     }
@@ -132,13 +103,13 @@ const deleteForm = asyncHandler(async (req, res) => {
 
 // Update Form
 const editForm = asyncHandler(async (req, res) => {
-  const { title, description, questions } = req.body;
+  const { category, questions } = req.body;
   const { formId } = req.params;
 
-  // console.log('id: ', formId);
-  // console.log('title: ', title);
+  console.log('id: ', formId);
+  console.log('category: ', category);
   // console.log('description: ', description);
-  // console.log('questions: ', questions);
+  console.log('questions: ', questions);
 
   const form = await FormData.findById(formId);
 
@@ -157,8 +128,7 @@ const editForm = asyncHandler(async (req, res) => {
   const editedForm = await FormData.findByIdAndUpdate(
     { _id: formId },
     {
-      title,
-      description,
+      category,
       questions,
     },
     {
@@ -166,6 +136,7 @@ const editForm = asyncHandler(async (req, res) => {
       runValidators: true,
     }
   );
+  console.log('Edited Form: ', editedForm);
 
   res.status(200).json(editedForm);
 });
@@ -237,6 +208,40 @@ const getResponse = asyncHandler(async (req, res) => {
   res.status(200).json(Response);
 });
 
+//Create Questions Bank
+// const createQuestions = asyncHandler(async (req, res) => {
+//   const { category, createdBy, questions } = req.body;
+
+//   //   Validation
+//   // || !questionText || !optionText
+//   if (!category || !questions) {
+//     res.status(400);
+//     throw new Error('Please fill in all fields');
+//   }
+
+//   // Create QuesForm
+//   const QuesForm = await QuesData.create({
+//     createdBy,
+//     category,
+//     questions,
+//   });
+//   console.log('QuesForm: ', QuesForm);
+
+//   await UserData.updateOne(
+//     { _id: QuesForm.createdBy.userId },
+//     {
+//       $push: {
+//         QuesCategoryCreated: {
+//           formId: QuesForm._id,
+//           categories: QuesForm.category,
+//         },
+//       },
+//     }
+//   );
+
+//   res.status(201).json(QuesForm);
+// });
+
 module.exports = {
   createForm,
   getAllForms,
@@ -247,4 +252,5 @@ module.exports = {
   submitResponse,
   getAllResponses,
   getResponse,
+  // createQuestions,
 };

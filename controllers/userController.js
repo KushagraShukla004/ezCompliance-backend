@@ -13,10 +13,10 @@ const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 // Register User
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { emp_Id, name, designation, email, password, phone } = req.body;
 
   // Validation
-  if (!name || !email || !password) {
+  if (!emp_Id || !name || !email || !password || !phone) {
     res.status(400);
     throw new Error('Please fill in all required fields');
   }
@@ -25,12 +25,12 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('Password must be up to 6 characters');
   }
 
-  // Check if user email already exists
-  const userExists = await User.findOne({ email });
+  // Check if user emp_Id and email already exists
+  const userExists = await User.findOne({ emp_Id, email });
 
   if (userExists) {
     res.status(400);
-    throw new Error('Email has already been registered');
+    throw new Error('emp_Id or Email has already been registered');
   }
 
   // Get User Device Details
@@ -39,8 +39,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Create new user
   const user = await User.create({
+    emp_Id,
     name,
+    designation,
     email,
+    phone,
     password,
     userAgent,
   });
@@ -58,10 +61,22 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
-    const { _id, name, email, photo, phone, bio, isVerified } = user;
+    const {
+      _id,
+      emp_Id,
+      name,
+      designation,
+      email,
+      photo,
+      phone,
+      bio,
+      isVerified,
+    } = user;
     res.status(201).json({
       _id,
+      emp_Id,
       name,
+      designation,
       email,
       photo,
       phone,
@@ -102,7 +117,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const allowedDevice = user.userAgent.includes(thisUserAgent);
   if (!allowedDevice) {
     const loginCode = Math.floor(100000 + Math.random() * 900000);
-    console.log('Login Code', loginCode);
+    // console.log('Login Code', loginCode);
     // Hash token before saving to DB
     const encryptedLoginCode = cryptr.encrypt(loginCode.toString());
     // Delete token if it exists in DB
@@ -133,10 +148,23 @@ const loginUser = asyncHandler(async (req, res) => {
       sameSite: 'none',
       secure: true,
     });
-    const { _id, name, email, photo, phone, bio, isVerified, role } = user;
+    const {
+      _id,
+      emp_Id,
+      name,
+      designation,
+      email,
+      photo,
+      phone,
+      bio,
+      isVerified,
+      role,
+    } = user;
     res.status(200).json({
       _id,
+      emp_Id,
       name,
+      designation,
       email,
       photo,
       phone,
@@ -201,81 +229,6 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   // }
 });
 
-// Send Verification Email
-const sendVerificationEmail = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
-
-  // Check if user doesn't exists
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
-
-  if (user.isVerified) {
-    res.status(400);
-    throw new Error('User already verified');
-  }
-
-  // Delete token if it exists in DB
-  let token = await Token.findOne({ userId: user._id });
-  if (token) {
-    await token.deleteOne();
-  }
-
-  // Create Verification Token and save
-  const verificationToken = crypto.randomBytes(32).toString('hex') + user.id;
-  // console.log(verificationToken);
-  // Hash token before saving to DB
-  const hashedToken = hashToken(verificationToken);
-
-  // Save Token to DB
-  await new Token({
-    userId: user._id,
-    vToken: hashedToken,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 30 * (60 * 1000), // 30 minutes
-  }).save();
-
-  // Construct Verification Url
-  const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
-
-  console.log('verificationURL: ', verificationUrl);
-  // Verification Email
-  // const message = `
-  //     <h2>Hello ${user.name}</h2>
-  //     <p>Please use the url below to verify your account</p>
-  //     <p>This link is valid for 24hrs</p>
-
-  //     <a href=${verificationUrl} clicktracking=off>${verificationUrl}</a>
-
-  //     <p>Regards...</p>
-  //     <p>AUTH:Z Team</p>
-  //   `;
-  // const subject = 'Verify Your Account - ezCompliance';
-  // const send_to = user.email;
-  // const sent_from = process.env.EMAIL_USER;
-  // const reply_to = 'noreply@ezcompliance.com';
-  // const template = 'verifyEmail';
-  // const name = user.name;
-  // const link = verificationUrl;
-
-  // try {
-  //   await sendEmail(
-  //     subject,
-  //     send_to,
-  //     sent_from,
-  //     reply_to,
-  //     template,
-  //     name,
-  //     link
-  //   );
-  //   res.status(200).json({ success: true, message: 'Verification Email Sent' });
-  // } catch (error) {
-  //   res.status(500);
-  //   throw new Error('Email not sent, please try again');
-  // }
-});
-
 //Logout
 const logoutUser = asyncHandler(async (req, res) => {
   res.cookie('token', '', {
@@ -293,10 +246,23 @@ const getUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
-    const { _id, name, email, photo, phone, bio, isVerified, role } = user;
+    const {
+      _id,
+      emp_Id,
+      name,
+      designation,
+      email,
+      photo,
+      phone,
+      bio,
+      isVerified,
+      role,
+    } = user;
     res.status(200).json({
       _id,
+      emp_Id,
       name,
+      designation,
       email,
       photo,
       phone,
@@ -315,9 +281,11 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
-    const { name, email, photo, phone, bio, role, isVerified } = user;
+    const { name, designation, email, photo, phone, bio, role, isVerified } =
+      user;
     user.email = email;
     user.name = req.body.name || name;
+    user.designation = req.body.designation || designation;
     user.phone = req.body.phone || phone;
     user.bio = req.body.bio || bio;
     user.photo = req.body.photo || photo;
@@ -327,6 +295,7 @@ const updateUser = asyncHandler(async (req, res) => {
     res.status(200).json({
       _id: updatedUser._id,
       name: updatedUser.name,
+      designation: updatedUser.designation,
       email: updatedUser.email,
       photo: updatedUser.photo,
       phone: updatedUser.phone,
@@ -395,54 +364,45 @@ const upgradeUser = asyncHandler(async (req, res) => {
   res.status(200).json(`User role updated to ${role}`);
 });
 
-// Send Automated Email
-const sendAutomatedEmail = asyncHandler(async (req, res) => {
-  const { subject, send_to, reply_to, template, url } = req.body;
-  // res.send(template);
+// Send Verification Email
+const sendVerificationEmail = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
 
-  if (!subject || !send_to || !reply_to || !template) {
-    res.status(400);
-    throw new Error('Missing automated email parameter');
-  }
-
-  // Get user
-  const user = await User.findOne({ email: send_to });
-
+  // Check if user doesn't exists
   if (!user) {
     res.status(404);
     throw new Error('User not found');
   }
 
-  // const subject = "Verify Your Account - ezCompliance";
-  // const send_to = user.email;
-  // const sent_from = process.env.EMAIL_USER;
-  // const reply_to = "noreply@ezcompliance.com";
-  // const template = "email";
-  // const role = user.role;
-  // const sent_from = process.env.EMAIL_USER;
-  // const name = user.name;
-  // const link = `${process.env.FRONTEND_URL}${url}`;
+  if (user.isVerified) {
+    res.status(400);
+    throw new Error('User already verified');
+  }
 
-  // try {
-  //   await sendEmail(
-  //     subject,
-  //     send_to,
-  //     sent_from,
-  //     reply_to,
-  //     template,
-  //     name,
-  //     link
-  //   );
-  //   res.status(200).json({ success: true, message: 'Email Sent!!!' });
-  // } catch (error) {
-  //   res.status(500);
-  //   throw new Error('Email not sent, please try again');
-  // }
+  // Delete token if it exists in DB
+  let token = await Token.findOne({ userId: user._id });
+  if (token) {
+    await token.deleteOne();
+  }
+
+  // Create Verification Token and save
+  const verificationToken = user._id.toString();
+
+  // Hash token before saving to DB
+  const hashedToken = hashToken(verificationToken);
+
+  // Save Token to DB
+  await new Token({
+    userId: user._id,
+    vToken: hashedToken,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 30 * (60 * 1000), // 30 minutes
+  }).save();
 });
 
 // Verify User
 const verifyUser = asyncHandler(async (req, res) => {
-  const { verificationToken } = req.params;
+  const { verificationToken } = req.body;
 
   // Hash Token
   const hashedToken = crypto
@@ -654,10 +614,23 @@ const loginWithCode = asyncHandler(async (req, res) => {
       secure: true,
     });
 
-    const { _id, name, email, photo, phone, bio, isVerified, role } = user;
+    const {
+      _id,
+      emp_Id,
+      name,
+      designation,
+      email,
+      photo,
+      phone,
+      bio,
+      isVerified,
+      role,
+    } = user;
     res.status(200).json({
       _id,
+      emp_Id,
       name,
+      designation,
       email,
       photo,
       phone,
@@ -679,7 +652,7 @@ module.exports = {
   getUsers,
   loginStatus,
   upgradeUser,
-  sendAutomatedEmail,
+  // sendAutomatedEmail,
   sendVerificationEmail,
   verifyUser,
   changePassword,
