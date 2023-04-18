@@ -66,7 +66,7 @@ const getAllUserResources = asyncHandler(async (req, res) => {
     'employee.emp_Id': emp_Id,
   }).sort('-createdAt');
 
-  //   console.log('allFormsofUser: ', allResourcesofUser);
+  // console.log('allResourcesofUser: ', allResourcesofUser);
 
   res.status(200).json(allResourcesofUser);
 });
