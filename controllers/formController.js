@@ -22,7 +22,7 @@ const createForm = asyncHandler(async (req, res) => {
     category,
     questions,
   });
-  console.log('Form: ', Form);
+  // console.log('Form: ', Form);
 
   await UserData.updateOne(
     { _id: Form.createdBy.userId },
@@ -163,18 +163,37 @@ const submitResponse = asyncHandler(async (req, res) => {
 });
 
 // Get all Response of user
-const getAllResponses = asyncHandler(async (req, res) => {
-  const allResponses = await ResponseData.find({ userId: req.user.id }).sort(
-    '-createdAt'
-  );
-  res.status(200).json(allResponses);
+const getAllResponseForms = asyncHandler(async (req, res) => {
+  const allResponseForms = await ResponseData.aggregate([
+    {
+      $match: { user: new mongoose.Types.ObjectId(req.user.id) },
+    },
+    {
+      $lookup: {
+        from: 'Form',
+        localField: 'formId',
+        foreignField: '_id',
+        pipeline: [{ $project: { createdBy: 1, category: 1 } }],
+        as: 'resForm',
+      },
+    },
+    {
+      $project: {
+        resForm: { $first: '$resForm' },
+        response: 1,
+        formId: 1,
+        user: 1,
+        createdAt: 1,
+      },
+    },
+  ]);
+  res.status(200).json(allResponseForms);
 });
 
 // get a Response
 const getResponse = asyncHandler(async (req, res) => {
   const { formId } = req.params;
 
-  // const Response = await ResponseData.find({ formId: formId });
   const Response = await ResponseData.aggregate([
     {
       $match: { formId: new mongoose.Types.ObjectId(formId) },
@@ -208,40 +227,6 @@ const getResponse = asyncHandler(async (req, res) => {
   res.status(200).json(Response);
 });
 
-//Create Questions Bank
-// const createQuestions = asyncHandler(async (req, res) => {
-//   const { category, createdBy, questions } = req.body;
-
-//   //   Validation
-//   // || !questionText || !optionText
-//   if (!category || !questions) {
-//     res.status(400);
-//     throw new Error('Please fill in all fields');
-//   }
-
-//   // Create QuesForm
-//   const QuesForm = await QuesData.create({
-//     createdBy,
-//     category,
-//     questions,
-//   });
-//   console.log('QuesForm: ', QuesForm);
-
-//   await UserData.updateOne(
-//     { _id: QuesForm.createdBy.userId },
-//     {
-//       $push: {
-//         QuesCategoryCreated: {
-//           formId: QuesForm._id,
-//           categories: QuesForm.category,
-//         },
-//       },
-//     }
-//   );
-
-//   res.status(201).json(QuesForm);
-// });
-
 module.exports = {
   createForm,
   getAllForms,
@@ -250,7 +235,6 @@ module.exports = {
   deleteForm,
   editForm,
   submitResponse,
-  getAllResponses,
+  getAllResponseForms,
   getResponse,
-  // createQuestions,
 };

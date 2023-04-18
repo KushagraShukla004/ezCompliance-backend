@@ -6,6 +6,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const userRoute = require('./routes/userRoute');
 const formRoute = require('./routes/formRoute');
+const resourceRoute = require('./routes/resourceRoute');
 const errorHandler = require('./middleware/errorMiddleware');
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(
 //Routes
 app.use('/api/users', userRoute);
 app.use('/api/forms', formRoute);
+app.use('/api/resources', resourceRoute);
 
 app.get('/', (req, res) => {
   res.send('Home Page');

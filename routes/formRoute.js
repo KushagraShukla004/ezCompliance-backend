@@ -15,7 +15,7 @@ const {
   deleteForm,
   editForm,
   submitResponse,
-  getAllResponses,
+  getAllResponseForms,
   getResponse,
   getAllForms,
 } = require('../controllers/formController');
@@ -30,7 +30,7 @@ router.patch('/editForm/:formId', protect, adminOnly, editForm);
 
 //Response Routes
 router.post('/addResponse', protect, submitResponse);
-router.get('/Responses', protect, AdminandAuditorOnly, getAllResponses);
+router.get('/Responses', protect, AdminandAuditorOnly, getAllResponseForms);
 router.get('/getResponse/:formId', protect, AdminandAuditorOnly, getResponse);
 
 module.exports = router;

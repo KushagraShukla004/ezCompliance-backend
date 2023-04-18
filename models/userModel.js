@@ -5,11 +5,14 @@ const userSchema = mongoose.Schema(
   {
     emp_Id: {
       type: String,
+      unique: true,
       required: [true, 'Please add your Employee Code/Id'],
     },
     name: {
       type: String,
       required: [true, 'Please add a name'],
+      min: 2,
+      max: 100,
     },
     designation: {
       type: String,
@@ -66,6 +69,7 @@ const userSchema = mongoose.Schema(
       default: [],
     },
     createdForms: [],
+    resources: [],
   },
   {
     timestamps: true,

@@ -30,7 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (userExists) {
     res.status(400);
-    throw new Error('emp_Id or Email has already been registered');
+    throw new Error('Employee ID or Email has already been registered');
   }
 
   // Get User Device Details
@@ -111,30 +111,30 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new Error('Invalid email or password');
   }
   // Trigger 2FA for unknown userAgent/device
-  const ua = parser(req.headers['user-agent']);
-  const thisUserAgent = ua.ua;
+  // const ua = parser(req.headers['user-agent']);
+  // const thisUserAgent = ua.ua;
   // console.log(thisUserAgent);
-  const allowedDevice = user.userAgent.includes(thisUserAgent);
-  if (!allowedDevice) {
-    const loginCode = Math.floor(100000 + Math.random() * 900000);
-    // console.log('Login Code', loginCode);
-    // Hash token before saving to DB
-    const encryptedLoginCode = cryptr.encrypt(loginCode.toString());
-    // Delete token if it exists in DB
-    let userToken = await Token.findOne({ userId: user._id });
-    if (userToken) {
-      await userToken.deleteOne();
-    }
-    // Save Access Token to DB
-    await new Token({
-      userId: user._id,
-      loginToken: encryptedLoginCode,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 60 * (60 * 1000), // 60 minutes
-    }).save();
-    res.status(400);
-    throw new Error('New browser or device detected');
-  }
+  // const allowedDevice = user.userAgent.includes(thisUserAgent);
+  // if (!allowedDevice) {
+  //   const loginCode = Math.floor(100000 + Math.random() * 900000);
+  //   // console.log('Login Code', loginCode);
+  //   // Hash token before saving to DB
+  //   const encryptedLoginCode = cryptr.encrypt(loginCode.toString());
+  //   // Delete token if it exists in DB
+  //   let userToken = await Token.findOne({ userId: user._id });
+  //   if (userToken) {
+  //     await userToken.deleteOne();
+  //   }
+  //   // Save Access Token to DB
+  //   await new Token({
+  //     userId: user._id,
+  //     loginToken: encryptedLoginCode,
+  //     createdAt: Date.now(),
+  //     expiresAt: Date.now() + 60 * (60 * 1000), // 60 minutes
+  //   }).save();
+  //   res.status(400);
+  //   throw new Error('New browser or device detected');
+  // }
 
   //   Generate Token
   const token = generateToken(user._id);
