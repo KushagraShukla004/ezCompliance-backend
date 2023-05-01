@@ -156,13 +156,14 @@ const submitResponse = asyncHandler(async (req, res) => {
   const createdResponse = await ResponseData.create({
     formId,
     user,
+    employee,
     response,
   });
 
   return res.status(200).json(createdResponse);
 });
 
-// Get all Response of user
+// Get all Response of auditor
 const getAllResponseForms = asyncHandler(async (req, res) => {
   const allResponseForms = await ResponseData.aggregate([
     {
@@ -183,6 +184,7 @@ const getAllResponseForms = asyncHandler(async (req, res) => {
         response: 1,
         formId: 1,
         user: 1,
+        employee: 1,
         createdAt: 1,
       },
     },
@@ -211,6 +213,7 @@ const getResponse = asyncHandler(async (req, res) => {
       $project: {
         formId: 1,
         user: { $first: '$user' },
+        employee: 1,
         response: 1,
         createdAt: 1,
         updatedAt: 1,

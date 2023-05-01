@@ -14,8 +14,8 @@ const FormSchema = new mongoose.Schema(
       role: String,
     },
     category: {
-      type: String,
-      required: [true, 'Please add a Category'],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
     },
     questions: [
       {

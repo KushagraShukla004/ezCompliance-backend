@@ -13,6 +13,17 @@ var ResponseSchema = new mongoose.Schema(
       ref: 'User',
     },
 
+    employee: {
+      _id: false,
+      empId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      name: String,
+      email: String,
+      role: String,
+    },
+
     response: [
       {
         questionId: String,
