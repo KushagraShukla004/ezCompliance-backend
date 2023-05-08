@@ -10,7 +10,7 @@ const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 router.post('/', protect, adminOnly, addCategory);
 router.get('/', protect, adminOnly, getAllCategories);
-router.delete('/', protect, adminOnly, deleteCategory);
+router.delete('/:cat_id', protect, adminOnly, deleteCategory);
 router.patch('/', protect, adminOnly, editCategory);
 
 module.exports = router;

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const mongoosePaginate = require('mongoose-paginate-v2');
+const mongoose = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 const FormSchema = new mongoose.Schema(
   {
@@ -7,15 +7,15 @@ const FormSchema = new mongoose.Schema(
       _id: false,
       userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
       },
       name: String,
       email: String,
       role: String,
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
+      type: mongoose.Schema.Types.String,
+      ref: "Category",
     },
     questions: [
       {
@@ -32,6 +32,6 @@ const FormSchema = new mongoose.Schema(
 );
 
 FormSchema.plugin(mongoosePaginate);
-const FormData = mongoose.model('Form', FormSchema, 'Form');
+const FormData = mongoose.model("Form", FormSchema, "Form");
 
 module.exports = FormData;

@@ -56,13 +56,13 @@ const editCategory = asyncHandler(async (req, res) => {
 
 //Delete a Category
 const deleteCategory = asyncHandler(async (req, res) => {
-  const { cat_Id } = req.body;
+  const { cat_id } = req.params;
 
-  console.log(`cat_Id :`, cat_Id);
+  console.log(`cat_Id :`, cat_id);
   // console.log(`req.body category :`, category);
-  const DelCategory = await CategoryData.findById(cat_Id);
-  console.log(`DelCategory :`, DelCategory);
-  console.log(`DelCategory :`, DelCategory?.category);
+  const DelCategory = await CategoryData.findById(cat_id);
+  // console.log(`DelCategory :`, DelCategory);
+  console.log(`DelCategory.category :`, DelCategory?.category);
 
   if (!DelCategory) {
     res.status(404);
