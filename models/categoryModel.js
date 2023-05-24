@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+var mongoose = require("mongoose");
 
 const CategorySchema = new mongoose.Schema(
   {
@@ -6,7 +6,7 @@ const CategorySchema = new mongoose.Schema(
       _id: false,
       userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
       },
       name: String,
       email: String,
@@ -15,12 +15,12 @@ const CategorySchema = new mongoose.Schema(
     category: {
       type: String,
       unique: true,
-      required: [true, 'Please add a Category'],
+      required: [true, "Please add a Category"],
     },
   },
   { timestamps: true }
 );
 
-const CategoryData = mongoose.model('Category', CategorySchema, 'Categories');
+const CategoryData = mongoose.model("Category", CategorySchema, "Categories");
 
 module.exports = CategoryData;

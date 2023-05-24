@@ -1,19 +1,18 @@
-const asyncHandler = require('express-async-handler');
-const FormData = require('../models/formModel');
-const UserData = require('../models/userModel');
-const ResponseData = require('../models/responseModel');
+const asyncHandler = require("express-async-handler");
+const FormData = require("../models/formModel");
+const UserData = require("../models/userModel");
+const ResponseData = require("../models/responseModel");
 // const ResourceData = require('../models/resourceModel');
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Create Form
 const createForm = asyncHandler(async (req, res) => {
   const { createdBy, category, questions } = req.body;
 
   //   Validation
-  // || !questionText || !optionText
   if (!category || !questions) {
     res.status(400);
-    throw new Error('Please fill in all fields');
+    throw new Error("Please fill in all fields");
   }
 
   // Create Form
@@ -22,7 +21,6 @@ const createForm = asyncHandler(async (req, res) => {
     category,
     questions,
   });
-  // console.log('Form: ', Form);
 
   await UserData.updateOne(
     { _id: Form.createdBy.userId },
@@ -44,14 +42,13 @@ const getAllFormsofUser = asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
   const allFormsofUser = await FormData.find({
-    'createdBy.userId': userId,
-  }).sort('-createdAt');
-  // console.log('allFormsofUser: ', allFormsofUser);
+    "createdBy.userId": userId,
+  }).sort("-createdAt");
   res.status(200).json(allFormsofUser);
 });
 // Get all the Forms
 const getAllForms = asyncHandler(async (req, res) => {
-  const allForms = await FormData.find().sort('-createdAt');
+  const allForms = await FormData.find().sort("-createdAt");
   res.status(200).json(allForms);
 });
 
@@ -62,7 +59,7 @@ const getFormById = asyncHandler(async (req, res) => {
   // if product doesnt exist
   if (!Form) {
     res.status(404);
-    throw new Error('Form not found');
+    throw new Error("Form not found");
   }
   res.status(200).json(Form);
 });
@@ -70,22 +67,20 @@ const getFormById = asyncHandler(async (req, res) => {
 // Delete Product
 const deleteForm = asyncHandler(async (req, res) => {
   const formId = req.params.formId;
-  // console.log('formId: ', formId);
   const form = await FormData.findById(formId);
-  console.log('form: ', form);
   // if product doesnt exist
   if (!form) {
     res.status(404);
-    throw new Error('Form not found');
+    throw new Error("Form not found");
   }
-  // Match product to its user
-  if (form.createdBy.toString() !== req.user.id.toString()) {
+  // Match form to its user
+  if (form.createdBy.userId.toString() !== req.user.id.toString()) {
     res.status(401);
-    throw new Error('User not authorized');
+    throw new Error("User not authorized");
   }
   await form.remove();
   await UserData.updateOne(
-    { _id: form.createdBy },
+    { _id: form.createdBy.userId },
     {
       $pull: {
         createdForms: {
@@ -98,7 +93,7 @@ const deleteForm = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json({ message: `Form : ${form.title} is successfully deleted` });
+    .json({ message: `Form : ${form.category} is successfully deleted` });
 });
 
 // Update Form
@@ -106,22 +101,21 @@ const editForm = asyncHandler(async (req, res) => {
   const { category, questions } = req.body;
   const { formId } = req.params;
 
-  console.log('id: ', formId);
-  console.log('category: ', category);
-  // console.log('description: ', description);
-  console.log('questions: ', questions);
+  console.log("id: ", formId);
+  console.log("category: ", category);
+  console.log("questions: ", questions);
 
   const form = await FormData.findById(formId);
 
   // if Form doesnt exist
   if (!form) {
     res.status(404);
-    throw new Error('Form not found');
+    throw new Error("Form not found");
   }
   // Match Form to its user
-  if (form.createdBy.toString() !== req.user.id) {
+  if (form.createdBy.userId.toString() !== req.user.id.toString()) {
     res.status(401);
-    throw new Error('User not authorized');
+    throw new Error("User not authorized");
   }
 
   // edited Form
@@ -136,30 +130,26 @@ const editForm = asyncHandler(async (req, res) => {
       runValidators: true,
     }
   );
-  console.log('Edited Form: ', editedForm);
+  console.log("Edited Form: ", editedForm);
 
   res.status(200).json(editedForm);
 });
 
 //Submit Response
 const submitResponse = asyncHandler(async (req, res) => {
-  const { formId, user, response } = req.body;
-  // console.log('formId: ', typeof formId);
-  // console.log('formId: ', formId);
-  // console.log('user: ', user);
-  // console.log('response: ', response);
+  const { formId, user, category, employee, response } = req.body;
 
   if (!response) {
-    throw new Error('Please fill in a response');
+    throw new Error("Please fill in a response");
   }
 
   const createdResponse = await ResponseData.create({
     formId,
     user,
+    category,
     employee,
     response,
   });
-
   return res.status(200).json(createdResponse);
 });
 
@@ -171,19 +161,20 @@ const getAllResponseForms = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: 'Form',
-        localField: 'formId',
-        foreignField: '_id',
+        from: "Form",
+        localField: "formId",
+        foreignField: "_id",
         pipeline: [{ $project: { createdBy: 1, category: 1 } }],
-        as: 'resForm',
+        as: "resForm",
       },
     },
     {
       $project: {
-        resForm: { $first: '$resForm' },
+        resForm: { $first: "$resForm" },
         response: 1,
         formId: 1,
         user: 1,
+        category: 1,
         employee: 1,
         createdAt: 1,
       },
@@ -202,31 +193,30 @@ const getResponse = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: 'users',
-        foreignField: '_id',
-        localField: 'user',
-        as: 'user',
+        from: "users",
+        foreignField: "_id",
+        localField: "user",
+        as: "user",
         pipeline: [{ $project: { name: 1, email: 1, role: 1 } }],
       },
     },
     {
       $project: {
         formId: 1,
-        user: { $first: '$user' },
+        user: { $first: "$user" },
         employee: 1,
+        category: 1,
         response: 1,
         createdAt: 1,
         updatedAt: 1,
       },
     },
   ]);
-  // console.log('Response(in getResponse formController): ', Response);
   // if response doesnt exist
   if (!Response) {
     res.status(404);
-    throw new Error('Response not found');
+    throw new Error("Response not found");
   }
-
   res.status(200).json(Response);
 });
 
