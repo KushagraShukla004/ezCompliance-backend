@@ -64,11 +64,11 @@ const getFormById = asyncHandler(async (req, res) => {
   res.status(200).json(Form);
 });
 
-// Delete Product
+// Delete Form
 const deleteForm = asyncHandler(async (req, res) => {
   const formId = req.params.formId;
   const form = await FormData.findById(formId);
-  // if product doesnt exist
+  // if Form doesnt exist
   if (!form) {
     res.status(404);
     throw new Error("Form not found");
