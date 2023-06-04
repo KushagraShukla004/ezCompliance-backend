@@ -101,10 +101,6 @@ const editForm = asyncHandler(async (req, res) => {
   const { category, questions } = req.body;
   const { formId } = req.params;
 
-  console.log("id: ", formId);
-  console.log("category: ", category);
-  console.log("questions: ", questions);
-
   const form = await FormData.findById(formId);
 
   // if Form doesnt exist
@@ -130,7 +126,6 @@ const editForm = asyncHandler(async (req, res) => {
       runValidators: true,
     }
   );
-  console.log("Edited Form: ", editedForm);
 
   res.status(200).json(editedForm);
 });

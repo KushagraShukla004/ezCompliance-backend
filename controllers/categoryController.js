@@ -34,8 +34,6 @@ const getAllCategories = asyncHandler(async (req, res) => {
 //Edit a Category
 const editCategory = asyncHandler(async (req, res) => {
   const { cat_id, category } = req.body;
-  console.log("id: ", cat_id);
-  console.log("category: ", category);
 
   const Category = await CategoryData.findById(cat_id);
 

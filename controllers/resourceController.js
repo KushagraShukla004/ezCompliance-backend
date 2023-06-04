@@ -1,8 +1,8 @@
-const asyncHandler = require('express-async-handler');
-const FormData = require('../models/formModel');
-const UserData = require('../models/userModel');
-const ResourceData = require('../models/resourceModel');
-const mongoose = require('mongoose');
+const asyncHandler = require("express-async-handler");
+const FormData = require("../models/formModel");
+const UserData = require("../models/userModel");
+const ResourceData = require("../models/resourceModel");
+const mongoose = require("mongoose");
 
 //Create Resource Information
 const addResource = asyncHandler(async (req, res) => {
@@ -12,7 +12,7 @@ const addResource = asyncHandler(async (req, res) => {
   // || !questionText || !optionText
   if (!employee || !name || !IP || !category || !makeModel || !amount) {
     res.status(400);
-    throw new Error('Please fill in all fields');
+    throw new Error("Please fill in all fields");
   }
 
   // Create Resource
@@ -24,8 +24,6 @@ const addResource = asyncHandler(async (req, res) => {
     makeModel,
     amount,
   });
-
-  //   console.log('Resource: ', Resource);
 
   await UserData.updateOne(
     { emp_Id: Resource.employee.emp_Id },
@@ -53,7 +51,7 @@ const getResource = asyncHandler(async (req, res) => {
 
   if (!Resource) {
     res.status(404);
-    throw new Error('Resource not found');
+    throw new Error("Resource not found");
   }
   res.status(201).json(Resource);
 });
@@ -63,16 +61,14 @@ const getAllUserResources = asyncHandler(async (req, res) => {
   const emp_Id = req.user.emp_Id;
 
   const allResourcesofUser = await ResourceData.find({
-    'employee.emp_Id': emp_Id,
-  }).sort('-createdAt');
-
-  // console.log('allResourcesofUser: ', allResourcesofUser);
+    "employee.emp_Id": emp_Id,
+  }).sort("-createdAt");
 
   res.status(200).json(allResourcesofUser);
 });
 // Get all the Forms
 const getAllResources = asyncHandler(async (req, res) => {
-  const AllResources = await ResourceData.find().sort('-createdAt');
+  const AllResources = await ResourceData.find().sort("-createdAt");
   res.status(200).json(AllResources);
 });
 module.exports = {

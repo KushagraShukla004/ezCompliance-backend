@@ -1,13 +1,13 @@
-const asyncHandler = require('express-async-handler');
-const User = require('../models/userModel');
-const Token = require('../models/tokenModel');
+const asyncHandler = require("express-async-handler");
+const User = require("../models/userModel");
+const Token = require("../models/tokenModel");
 // const sendEmail = require('../utils/sendEmail');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const { hashToken, generateToken } = require('../utils');
-const parser = require('ua-parser-js');
-const crypto = require('crypto');
-const Cryptr = require('cryptr');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const { hashToken, generateToken } = require("../utils");
+const parser = require("ua-parser-js");
+const crypto = require("crypto");
+const Cryptr = require("cryptr");
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
@@ -18,11 +18,11 @@ const registerUser = asyncHandler(async (req, res) => {
   // Validation
   if (!emp_Id || !name || !email || !password || !phone) {
     res.status(400);
-    throw new Error('Please fill in all required fields');
+    throw new Error("Please fill in all required fields");
   }
   if (password.length < 6) {
     res.status(400);
-    throw new Error('Password must be up to 6 characters');
+    throw new Error("Password must be up to 6 characters");
   }
 
   // Check if user emp_Id and email already exists
@@ -30,11 +30,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (userExists) {
     res.status(400);
-    throw new Error('Employee ID or Email has already been registered');
+    throw new Error("Employee ID or Email has already been registered");
   }
 
   // Get User Device Details
-  const ua = parser(req.headers['user-agent']);
+  const ua = parser(req.headers["user-agent"]);
   const userAgent = [ua.ua];
 
   // Create new user
@@ -52,11 +52,11 @@ const registerUser = asyncHandler(async (req, res) => {
   const token = generateToken(user._id);
 
   // Send HTTP-only cookie
-  res.cookie('token', token, {
-    path: '/',
+  res.cookie("token", token, {
+    path: "/",
     httpOnly: true,
     expires: new Date(Date.now() + 1000 * 86400), // 1 day
-    sameSite: 'none',
+    sameSite: "none",
     secure: true,
   });
 
@@ -86,7 +86,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(400);
-    throw new Error('Invalid user data');
+    throw new Error("Invalid user data");
   }
 });
 
@@ -96,56 +96,31 @@ const loginUser = asyncHandler(async (req, res) => {
   // Validate Request
   if (!email || !password) {
     res.status(400);
-    throw new Error('Please add email and password');
+    throw new Error("Please add email and password");
   }
   // Check if user exists
   const user = await User.findOne({ email });
   if (!user) {
     res.status(400);
-    throw new Error('User not found, please signup');
+    throw new Error("User not found, please signup");
   }
   // User exists, check if password is correct
   const passwordIsCorrect = await bcrypt.compare(password, user.password);
   if (!passwordIsCorrect) {
     res.status(400);
-    throw new Error('Invalid email or password');
+    throw new Error("Invalid email or password");
   }
-  // Trigger 2FA for unknown userAgent/device
-  // const ua = parser(req.headers['user-agent']);
-  // const thisUserAgent = ua.ua;
-  // console.log(thisUserAgent);
-  // const allowedDevice = user.userAgent.includes(thisUserAgent);
-  // if (!allowedDevice) {
-  //   const loginCode = Math.floor(100000 + Math.random() * 900000);
-  //   // console.log('Login Code', loginCode);
-  //   // Hash token before saving to DB
-  //   const encryptedLoginCode = cryptr.encrypt(loginCode.toString());
-  //   // Delete token if it exists in DB
-  //   let userToken = await Token.findOne({ userId: user._id });
-  //   if (userToken) {
-  //     await userToken.deleteOne();
-  //   }
-  //   // Save Access Token to DB
-  //   await new Token({
-  //     userId: user._id,
-  //     loginToken: encryptedLoginCode,
-  //     createdAt: Date.now(),
-  //     expiresAt: Date.now() + 60 * (60 * 1000), // 60 minutes
-  //   }).save();
-  //   res.status(400);
-  //   throw new Error('New browser or device detected');
-  // }
 
   //   Generate Token
   const token = generateToken(user._id);
 
   if (user && passwordIsCorrect) {
     // Send HTTP-only cookie
-    res.cookie('token', token, {
-      path: '/',
+    res.cookie("token", token, {
+      path: "/",
       httpOnly: true,
       expires: new Date(Date.now() + 1000 * 86400), // 1 day
-      sameSite: 'none',
+      sameSite: "none",
       secure: true,
     });
     const {
@@ -175,19 +150,18 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(400);
-    throw new Error('Something went wrong, please try again');
+    throw new Error("Something went wrong, please try again");
   }
 });
 
 //Send Login Code
 const sendLoginCode = asyncHandler(async (req, res) => {
   const { email } = req.params;
-  console.log(email);
   const user = await User.findOne({ email });
   // Check if user doesn't exists
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
   // Find Access Token in DB
   let userToken = await Token.findOne({
@@ -195,50 +169,23 @@ const sendLoginCode = asyncHandler(async (req, res) => {
   });
   if (!userToken) {
     res.status(500);
-    throw new Error('Invalid or Expired token, please Login again');
+    throw new Error("Invalid or Expired token, please Login again");
   }
   // get the login code
   const loginCode = userToken.loginToken;
   const decryptedLoginCode = cryptr.decrypt(loginCode);
-  // console.log('login code : ', loginCode);
-  console.log('decrypted Login Code : ', decryptedLoginCode);
-  // const subject = 'Login Access Code - ezCompliance';
-  // const send_to = email;
-  // const sent_from = process.env.EMAIL_USER;
-  // const reply_to = 'noreply@ezcompliance.com';
-  // const template = 'accessToken';
-  // const name = user.name;
-  // const link = decryptedLoginCode;
-  // try {
-  //   await sendEmail(
-  //     subject,
-  //     send_to,
-  //     sent_from,
-  //     reply_to,
-  //     template,
-  //     name,
-  //     link
-  //   );
-  //   res.status(200).json({
-  //     success: true,
-  //     message: `Access Code Sent to your email - ${email}`,
-  //   });
-  // } catch (error) {
-  //   res.status(500);
-  //   throw new Error('Email not sent, please try again');
-  // }
 });
 
 //Logout
 const logoutUser = asyncHandler(async (req, res) => {
-  res.cookie('token', '', {
-    path: '/',
+  res.cookie("token", "", {
+    path: "/",
     httpOnly: true,
     expires: new Date(0), // immediately expire
-    sameSite: 'none',
+    sameSite: "none",
     secure: true,
   });
-  return res.status(200).json({ message: 'Logout Successful' });
+  return res.status(200).json({ message: "Logout Successful" });
 });
 
 // Get User Data
@@ -272,7 +219,7 @@ const getUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(400);
-    throw new Error('User Not Found');
+    throw new Error("User Not Found");
   }
 });
 
@@ -305,7 +252,7 @@ const updateUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 });
 
@@ -315,19 +262,19 @@ const deleteUser = asyncHandler(async (req, res) => {
   // if user doesnt exist
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   await user.remove();
-  res.status(200).json({ message: 'User deleted successfully' });
+  res.status(200).json({ message: "User deleted successfully" });
 });
 
 //getUsers
 const getUsers = asyncHandler(async (req, res) => {
-  const users = await User.find().sort('-createdAt').select('-password');
+  const users = await User.find().sort("-createdAt").select("-password");
   if (!users) {
     res.status(500);
-    throw new Error('Something went wrong');
+    throw new Error("Something went wrong");
   }
   res.status(200).json(users);
 });
@@ -355,7 +302,7 @@ const upgradeUser = asyncHandler(async (req, res) => {
 
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   user.role = role;
@@ -371,12 +318,12 @@ const sendVerificationEmail = asyncHandler(async (req, res) => {
   // Check if user doesn't exists
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   if (user.isVerified) {
     res.status(400);
-    throw new Error('User already verified');
+    throw new Error("User already verified");
   }
 
   // Delete token if it exists in DB
@@ -406,9 +353,9 @@ const verifyUser = asyncHandler(async (req, res) => {
 
   // Hash Token
   const hashedToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(verificationToken)
-    .digest('hex');
+    .digest("hex");
 
   // find Token in DB
   const userToken = await Token.findOne({
@@ -418,14 +365,14 @@ const verifyUser = asyncHandler(async (req, res) => {
 
   if (!userToken) {
     res.status(404);
-    throw new Error('Invalid or Expired Token!!!');
+    throw new Error("Invalid or Expired Token!!!");
   }
   // Find User
   const user = await User.findOne({ _id: userToken.userId });
 
   if (user.isVerified) {
     res.status(400);
-    throw new Error('User is already verified!!!');
+    throw new Error("User is already verified!!!");
   }
 
   // Now Verify user
@@ -433,7 +380,7 @@ const verifyUser = asyncHandler(async (req, res) => {
   await user.save();
 
   res.status(200).json({
-    message: 'Account Verification Successful',
+    message: "Account Verification Successful",
   });
 });
 
@@ -444,12 +391,12 @@ const changePassword = asyncHandler(async (req, res) => {
 
   if (!user) {
     res.status(400);
-    throw new Error('User not found, please signup');
+    throw new Error("User not found, please signup");
   }
   //Validate
   if (!oldPassword || !password) {
     res.status(400);
-    throw new Error('Please add old and new password');
+    throw new Error("Please add old and new password");
   }
 
   // check if old password matches password in DB
@@ -461,10 +408,10 @@ const changePassword = asyncHandler(async (req, res) => {
     await user.save();
     res
       .status(200)
-      .json({ message: 'Password change successful, please re-login' });
+      .json({ message: "Password change successful, please re-login" });
   } else {
     res.status(400);
-    throw new Error('Old password is incorrect');
+    throw new Error("Old password is incorrect");
   }
 });
 
@@ -475,7 +422,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   if (!user) {
     res.status(404);
-    throw new Error('User does not exist');
+    throw new Error("User does not exist");
   }
 
   // Delete token if it exists in DB
@@ -485,14 +432,13 @@ const forgotPassword = asyncHandler(async (req, res) => {
   }
 
   // Create Reste Token
-  let resetToken = crypto.randomBytes(32).toString('hex') + user._id;
-  console.log(resetToken);
+  let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
 
   // Hash token before saving to DB
   const hashedToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(resetToken)
-    .digest('hex');
+    .digest("hex");
 
   // Save Token to DB
   await new Token({
@@ -513,7 +459,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   // const template = 'forgotPassword';
   // const name = user.name;
   const link = resetUrl;
-  alert('link: ', link);
+  alert("link: ", link);
 
   // try {
   //   await sendEmail(
@@ -539,9 +485,9 @@ const resetPassword = asyncHandler(async (req, res) => {
 
   // Hash token, then compare to Token in DB
   const hashedToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(resetToken)
-    .digest('hex');
+    .digest("hex");
 
   // Find Token in DB
   const userToken = await Token.findOne({
@@ -551,7 +497,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
   if (!userToken) {
     res.status(404);
-    throw new Error('Invalid or Expired Token');
+    throw new Error("Invalid or Expired Token");
   }
 
   // Find user and reset password
@@ -560,7 +506,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   await user.save();
 
   res.status(200).json({
-    message: 'Password Reset Successful, Please Login',
+    message: "Password Reset Successful, Please Login",
   });
 });
 
@@ -568,15 +514,13 @@ const resetPassword = asyncHandler(async (req, res) => {
 const loginWithCode = asyncHandler(async (req, res) => {
   const { email } = req.params;
   const { loginCode } = req.body;
-  console.log('Email : ', email);
-  console.log('loginCode : ', loginCode);
 
   const user = await User.findOne({ email });
 
   // Check if user doesn't exists
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   // Find Token in DB
@@ -587,7 +531,7 @@ const loginWithCode = asyncHandler(async (req, res) => {
 
   if (!userToken) {
     res.status(404);
-    throw new Error('Invalid or Expired Code, please login again');
+    throw new Error("Invalid or Expired Code, please login again");
   }
 
   const decryptedLoginCode = cryptr.decrypt(userToken.loginToken);
@@ -595,10 +539,10 @@ const loginWithCode = asyncHandler(async (req, res) => {
   // Log user in
   if (loginCode !== decryptedLoginCode) {
     res.status(400);
-    throw new Error('Incorrect login code, please try again');
+    throw new Error("Incorrect login code, please try again");
   } else {
     // Register the userAgent
-    const ua = parser(req.headers['user-agent']);
+    const ua = parser(req.headers["user-agent"]);
     const thisUserAgent = ua.ua;
     user.userAgent.push(thisUserAgent);
     await user.save();
@@ -606,11 +550,11 @@ const loginWithCode = asyncHandler(async (req, res) => {
     const token = generateToken(user._id);
 
     // Send HTTP-only cookie
-    res.cookie('token', token, {
-      path: '/',
+    res.cookie("token", token, {
+      path: "/",
       httpOnly: true,
       expires: new Date(Date.now() + 1000 * 86400), // 1 day
-      sameSite: 'none',
+      sameSite: "none",
       secure: true,
     });
 
