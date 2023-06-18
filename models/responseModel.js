@@ -33,6 +33,8 @@ var ResponseSchema = new mongoose.Schema(
         questionText: String,
         optionId: String,
         optionText: String,
+        // remarkId: String,
+        remarkText: String,
       },
     ],
   },
